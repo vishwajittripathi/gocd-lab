@@ -1,4 +1,10 @@
 format_version: 10
+# Environments section should be at root level
+environments:
+  dev:
+    environment_variables:
+      ENV: "dev"
+      DEPLOY_PATH: "/tmp/dev-deploy"
 pipelines:
   ci-pipeline:
     group: sample
@@ -17,8 +23,9 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        echo "=== BUILD ==="
-                        python app.py
+                        echo "=== BUILD STAGE ==="
+                        echo "Environment: $ENV"
+                        python3 app.py
                         echo "Build success"
       - test:
           clean_workspace: false
@@ -30,8 +37,10 @@ pipelines:
                     arguments:
                       - -c
                       - |
-                        echo "=== TEST ==="
-                        pytest || echo "No tests"
+                        echo "=== TEST STAGE ==="
+                        echo "Environment: $ENV"
+                        python3 -m pytest tests/ || echo "No tests found"
+                        echo "Test stage completed"
       - deploy:
           approval:
             type: manual
@@ -44,6 +53,9 @@ pipelines:
                       - -c
                       - |
                         echo "=== DEPLOY STAGE ==="
-                        echo "Deploying app..."
-                        sleep 3
-                        echo "Deployed successfully."
+                        echo "Environment: $ENV"
+                        echo "Deploy path: $DEPLOY_PATH"
+                        echo "Deploying app to $DEPLOY_PATH..."
+                        mkdir -p $DEPLOY_PATH
+                        cp app.py $DEPLOY_PATH/
+                        echo "Deployed successfully to $DEPLOY_PATH"
