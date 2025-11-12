@@ -1,0 +1,47 @@
+format_version: 10
+
+pipelines:
+  parallel-pipeline:
+    group: my-app-group
+    materials:
+      app-repo:
+        git: https://github.com/vishwajittripathi/gocd-lab.git
+        branch: main
+    parameters:
+      PARALLEL_JOBS: "3"
+    stages:
+      - build:
+          jobs:
+            build-linux:
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== Linux Build ==="
+                        echo "Parallel jobs: #{PARALLEL_JOBS}"
+                        uname -a
+                        python3 app.py
+
+            build-windows:
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== Windows Simulation ==="
+                        echo "Parallel jobs: #{PARALLEL_JOBS}"
+                        python3 app.py
+
+            build-mac:
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== macOS Simulation ==="
+                        echo "Parallel jobs: #{PARALLEL_JOBS}"
+                        python3 app.py

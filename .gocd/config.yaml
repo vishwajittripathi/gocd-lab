@@ -1,0 +1,18 @@
+format_version: 10
+
+# Global templates
+templates:
+  python-build-template:
+    stages:
+      - build:
+          jobs:
+            build-job:
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== Standard Python Build ==="
+                        python3 -m pip install -r requirements.txt
+                        python3 app.py

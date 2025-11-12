@@ -1,0 +1,152 @@
+format_version: 10
+# PURPOSE: Main CI/CD pipeline with parameters, artifacts, and multi-stage workflow
+# USAGE: Triggered on every git commit to main branch
+# FEATURES: Build → Test → Deploy with manual approval
+
+pipelines:
+  ci-pipeline:
+    group: my-app-group
+    materials:
+      app-repo:
+        git: https://github.com/vishwajittripathi/gocd-lab.git
+        branch: main
+        auto_update: true
+    parameters: # Pipeline-level configurable variables
+      BUILD_VERSION: "1.0.0"
+      DOCKER_IMAGE: "my-app"
+      ENVIRONMENT: "dev"
+      ENABLE_TESTS: "true"
+    stages:
+      - build:
+          clean_workspace: true
+          jobs:
+            build-job:
+              artifacts: # Store build outputs for later stages
+                - build:
+                    source: "app.py"
+                    destination: "build-artifacts"
+                - dependencies:
+                    source: "requirements.txt"
+                    destination: "dependencies"
+                - reports:
+                    source: "reports/*.xml"
+                    destination: "test-reports"
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== BUILD STAGE ==="
+                        echo "Building version: #{BUILD_VERSION}"
+                        echo "Docker image: #{DOCKER_IMAGE}"
+                        echo "Environment: #{ENVIRONMENT}"
+                        echo "Workspace: $PWD"
+
+                        # Install dependencies
+                        python3 -m pip install -r requirements.txt
+
+                        # Run application
+                        python3 app.py
+
+                        # Create build artifacts
+                        mkdir -p dist
+                        cp app.py dist/
+                        echo "✅ Build completed successfully"
+
+      - test:
+          clean_workspace: false
+          jobs:
+            unit-tests:
+              artifacts: # Store test results
+                - test-results:
+                    source: "test-reports/*.xml"
+                    destination: "test-results"
+                - coverage:
+                    source: "htmlcov/**/*"
+                    destination: "coverage-reports"
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== UNIT TESTS ==="
+                        echo "Running tests for version: #{BUILD_VERSION}"
+
+                        if [ "#{ENABLE_TESTS}" = "true" ]; then
+                          python3 -m pytest tests/ -v --junitxml=test-reports/unit-tests.xml --cov=.
+                          echo "✅ Tests executed successfully"
+                        else
+                          echo "⚠️ Tests disabled via parameter"
+                        fi
+
+            integration-tests:
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== INTEGRATION TESTS ==="
+                        echo "Running integration checks..."
+                        sleep 5
+
+                        # Simulate integration tests
+                        python3 -c "
+                        import requests
+                        print('Integration dependencies verified')
+                        "
+                        echo "✅ Integration tests passed"
+
+      - security-scan:
+          jobs:
+            security-check:
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== SECURITY SCAN ==="
+                        echo "Running security checks..."
+
+                        # Check for security issues
+                        python3 -c "
+                        import ast
+                        with open('app.py', 'r') as f:
+                            ast.parse(f.read())
+                        print('✅ Code syntax security check passed')
+                        "
+                        sleep 3
+                        echo "✅ Security scan completed"
+
+      - deploy:
+          approval: # Manual approval before deployment
+            type: manual
+            users: ["admin"]
+          jobs:
+            deploy-app:
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== DEPLOY STAGE ==="
+                        echo "🚀 Deploying version #{BUILD_VERSION}"
+                        echo "📦 Docker Image: #{DOCKER_IMAGE}"
+                        echo "🌍 Environment: #{ENVIRONMENT}"
+                        echo "📁 Using artifacts from build stage"
+
+                        # Simulate deployment process
+                        DEPLOY_PATH="/tmp/deploy-#{BUILD_VERSION}"
+                        mkdir -p $DEPLOY_PATH
+
+                        # Use artifacts from build stage
+                        cp -r build-artifacts/* $DEPLOY_PATH/
+                        cp -r dependencies/* $DEPLOY_PATH/
+
+                        echo "✅ Successfully deployed to: $DEPLOY_PATH"
+                        echo "📊 Test results available in artifacts"
+                        echo "🎉 Deployment completed successfully!"

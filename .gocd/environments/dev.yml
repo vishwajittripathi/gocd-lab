@@ -1,0 +1,15 @@
+format_version: 10
+
+environments:
+  dev:
+    environment_variables:
+      ENV: "development"
+      DEPLOY_PATH: "/tmp/dev-deploy"
+      API_URL: "https://dev-api.example.com"
+      LOG_LEVEL: "DEBUG"
+    pipelines:
+      - ci-pipeline
+      - template-based-pipeline
+    agents:
+      - gocd-agent-1
+      - gocd-agent-2

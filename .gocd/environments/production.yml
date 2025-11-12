@@ -1,0 +1,11 @@
+format_version: 10
+
+environments:
+  production:
+    environment_variables:
+      ENV: "production"
+      DEPLOY_PATH: "/opt/app"
+      API_URL: "https://api.example.com"
+      LOG_LEVEL: "WARN"
+    pipelines:
+      - scheduled-pipeline

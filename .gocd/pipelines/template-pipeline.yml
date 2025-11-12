@@ -1,0 +1,25 @@
+format_version: 10
+
+pipelines:
+  template-based-pipeline:
+    group: my-app-group
+    template: python-build-template
+    materials:
+      app-repo:
+        git: https://github.com/vishwajittripathi/gocd-lab.git
+        branch: main
+    parameters:
+      BUILD_TYPE: "release"
+    stages:
+      - build:
+          jobs:
+            build-job:
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== Template-Based Build ==="
+                        echo "Build type: #{BUILD_TYPE}"
+                        python3 app.py

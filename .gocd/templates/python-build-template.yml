@@ -1,0 +1,22 @@
+format_version: 10
+
+templates:
+  python-build-template:
+    stages:
+      - build:
+          jobs:
+            build-job:
+              artifacts:
+                - build-output:
+                    source: "**/*.py"
+                    destination: "build-output"
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== Standard Python Build Template ==="
+                        python3 -m pip install -r requirements.txt
+                        python3 app.py
+                        echo "Template build completed"

@@ -1,0 +1,32 @@
+format_version: 10
+
+pipelines:
+  scheduled-pipeline:
+    group: my-app-group
+    materials:
+      app-repo:
+        git: https://github.com/vishwajittripathi/gocd-lab.git
+        branch: main
+    timer:
+      spec: "0 2 * * *" # Daily at 2 AM
+      only_on_changes: true
+    parameters:
+      SCHEDULED_RUN: "true"
+    stages:
+      - nightly:
+          jobs:
+            nightly-build:
+              artifacts:
+                - nightly:
+                    source: "app.py"
+                    destination: "nightly-builds"
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== Scheduled Nightly Build ==="
+                        echo "Scheduled run: #{SCHEDULED_RUN}"
+                        echo "Build time: $(date)"
+                        python3 app.py
