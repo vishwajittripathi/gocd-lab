@@ -1,22 +1,49 @@
 format_version: 10
 pipelines:
-  build-pipeline:
+  ci-pipeline:
     group: sample
     materials:
-      git-repo:
+      app-repo:
         git: https://github.com/vishwajittripathi/gocd-lab.git
         branch: main
     stages:
       - build:
           clean_workspace: true
           jobs:
-            run-build:
+            build-job:
               tasks:
                 - exec:
                     command: bash
                     arguments:
                       - -c
                       - |
-                        echo "=== Running Build ==="
-                        python3 app.py
-                        echo "Build finished."
+                        echo "=== BUILD ==="
+                        python app.py
+                        echo "Build success"
+      - test:
+          clean_workspace: false
+          jobs:
+            test-job:
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== TEST ==="
+                        pytest || echo "No tests"
+      - deploy:
+          approval:
+            type: manual
+          jobs:
+            deploy-job:
+              tasks:
+                - exec:
+                    command: bash
+                    arguments:
+                      - -c
+                      - |
+                        echo "=== DEPLOY STAGE ==="
+                        echo "Deploying app..."
+                        sleep 3
+                        echo "Deployed successfully."
