@@ -1,1 +1,1 @@
-# gocd-lab
+# GoCD Lab
