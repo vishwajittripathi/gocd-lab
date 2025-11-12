@@ -1,7 +1,7 @@
 format_version: 10
 pipelines:
   build-pipeline:
-    group: my-app-group # Changed from 'sample'
+    group: sample
     materials:
       git-repo:
         git: https://github.com/vishwajittripathi/gocd-lab.git
