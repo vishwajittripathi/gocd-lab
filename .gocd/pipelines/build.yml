@@ -1,7 +1,7 @@
 format_version: 10
 pipelines:
   build-pipeline:
-    group: sample
+    group: my-app-group # Changed from 'sample'
     materials:
       git-repo:
         git: https://github.com/vishwajittripathi/gocd-lab.git
@@ -20,4 +20,3 @@ pipelines:
                         echo "=== Running Build ==="
                         python3 app.py
                         echo "Build finished."
-
